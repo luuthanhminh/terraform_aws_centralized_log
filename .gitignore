@@ -1,0 +1,15 @@
+.idea
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.retry
+ansible/ec2.ini
+ansible/group_vars/all.yml
+ansible/vars.yml
+terraform/dev/backend.tf
+tf.output
