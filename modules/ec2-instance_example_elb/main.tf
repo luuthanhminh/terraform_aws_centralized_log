@@ -108,12 +108,17 @@ resource "aws_security_group" "elb" {
   depends_on = ["aws_internet_gateway.gw"]
 }
 
+resource "aws_key_pair" "es_key" {
+  key_name   = "elb_example_es_key"
+  public_key = file("${path.root}/keys/es_keypair.pub")
+}
+
 resource "aws_elb" "web" {
   name = "${random_id.rdid.hex}-example-elb"
 
   access_logs {
-    bucket        = "elkstack-elk-log"
-    bucket_prefix = "elb"
+    bucket        = var.s3_bucket
+    bucket_prefix = var.elb_logs_prefix
     interval      = 5
   }
   # The same availability zone as our instance
@@ -152,19 +157,23 @@ resource "aws_lb_cookie_stickiness_policy" "default" {
   cookie_expiration_period = 600
 }
 
+data "aws_ssm_parameter" "amazonlinux2" {
+  name = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+}
+
 resource "aws_instance" "web" {
   instance_type = "t2.micro"
 
   # Lookup the correct AMI based on the region
   # we specified
-  ami = "${lookup(var.aws_amis, var.aws_region)}"
+  ami = data.aws_ssm_parameter.amazonlinux2.value
 
   # The name of our SSH keypair you've created and downloaded
   # from the AWS console.
   #
   # https://console.aws.amazon.com/ec2/v2/home?region=us-west-2#KeyPairs:
   #
-  key_name = "${var.key_name}"
+  key_name = aws_key_pair.es_key.key_name
 
   # Our Security group to allow HTTP and SSH access
   vpc_security_group_ids = ["${aws_security_group.default.id}"]
@@ -174,6 +183,6 @@ resource "aws_instance" "web" {
   #Instance tags
 
   tags = {
-    Name = "elb-example"
+    Name = "${random_id.rdid.hex}-elb-example"
   }
 }

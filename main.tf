@@ -59,6 +59,13 @@ resource "aws_cloudtrail" "elk_trail_log" {
   include_global_service_events = true
 }
 
+#### ELB Access Log ####
+module "ec2-instance_example_elb" {
+  source  = "./modules/ec2-instance_example_elb"
+  s3_bucket = module.sqs_notificaton.aws_logs_bucket
+  elb_logs_prefix = var.elb_logs_prefix
+}
+
 #### Cloudwatch Log Group to S3 ####
 module "cloudwatch-logs-exporter" {
   for_each = toset(var.log_groups)

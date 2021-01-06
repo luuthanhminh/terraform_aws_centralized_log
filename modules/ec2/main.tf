@@ -126,8 +126,5 @@ resource "null_resource" "wait_for_cloudinit" {
   depends_on = [ aws_instance.metricbeat ]
 }
 
-module "ec2-instance_example_elb" {
-  source  = "../ec2-instance_example_elb"
-  key_name = aws_key_pair.es_key.key_name
-}
+
 
