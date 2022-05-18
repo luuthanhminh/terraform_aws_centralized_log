@@ -1,12 +1,3 @@
-terraform {
-  required_version = ">= 0.13"
-}
-
-provider "aws" {
-  region = var.aws_region
-  profile = "default"
-  
-}
 
 # module "logs" {
 #   source  = "trussworks/logs/aws"
@@ -51,29 +42,29 @@ module "ec2_metricbeat" {
   cloud_auth = var.cloud_auth
 }
 
-#### CloudTrail Log ####
-resource "aws_cloudtrail" "elk_trail_log" {
-  name                          = "${var.stack_name}-trail-logs"
-  s3_bucket_name                = module.sqs_notificaton.aws_logs_bucket
-  s3_key_prefix = var.cloudtrail_logs_prefix
-  include_global_service_events = true
-}
+# #### CloudTrail Log ####
+# resource "aws_cloudtrail" "elk_trail_log" {
+#   name                          = "${var.stack_name}-trail-logs"
+#   s3_bucket_name                = module.sqs_notificaton.aws_logs_bucket
+#   s3_key_prefix = var.cloudtrail_logs_prefix
+#   include_global_service_events = true
+# }
 
-#### ELB Access Log ####
-module "ec2-instance_example_elb" {
-  source  = "./modules/ec2-instance_example_elb"
-  s3_bucket = module.sqs_notificaton.aws_logs_bucket
-  elb_logs_prefix = var.elb_logs_prefix
-}
+# #### ELB Access Log ####
+# module "ec2-instance_example_elb" {
+#   source  = "./modules/ec2-instance_example_elb"
+#   s3_bucket = module.sqs_notificaton.aws_logs_bucket
+#   elb_logs_prefix = var.elb_logs_prefix
+# }
 
-#### Cloudwatch Log Group to S3 ####
-module "cloudwatch-logs-exporter" {
-  for_each = toset(var.log_groups)
-  source  = "./modules/cloudwatch_s3_exporter"
-  schedule = "cron(*/5 * * * ? *)"
-  s3_bucket        = module.sqs_notificaton.aws_logs_bucket
-  name = "${var.stack_name}-${each.value}"
-  log_group        = each.value
-  s3_prefix        = var.cloudwatch_logs_prefix
-}
+# #### Cloudwatch Log Group to S3 ####
+# module "cloudwatch-logs-exporter" {
+#   for_each = toset(var.log_groups)
+#   source  = "./modules/cloudwatch_s3_exporter"
+#   schedule = "cron(*/5 * * * ? *)"
+#   s3_bucket        = module.sqs_notificaton.aws_logs_bucket
+#   name = "${var.stack_name}-${each.value}"
+#   log_group        = each.value
+#   s3_prefix        = var.cloudwatch_logs_prefix
+# }
 
